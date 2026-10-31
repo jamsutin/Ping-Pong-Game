@@ -96,7 +96,7 @@ python3 ping_pong_cinematic.py
 
 Repository ini juga menyediakan entrypoint terpisah untuk menjalankan game melalui browser menggunakan **Pygbag**. Versi desktop tetap menggunakan `ping_pong_cinematic.py` dan dependensi `requirements.txt`; versi browser menggunakan `main.py` dan `requirements-web.txt`.
 
-Setelah perubahan versi web digabungkan ke branch `main`, GitHub Actions akan membangun game dan menerbitkannya ke GitHub Pages.
+Setiap Pull Request yang mengubah file versi web akan menjalankan workflow `Check browser game build` untuk memvalidasi hasil Pygbag. Setelah perubahan versi web digabungkan ke branch `main`, workflow `Build and deploy browser game` akan membangun game dan menerbitkannya ke GitHub Pages.
 
 - **Main browser:** `https://jamsutin.github.io/Ping-Pong-Game/`
 - **Entry point web:** `main.py`
