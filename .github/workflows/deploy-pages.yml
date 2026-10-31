@@ -1,14 +1,6 @@
 name: Build and deploy browser game
 
 on:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "main.py"
-      - "ping_pong_cinematic.py"
-      - "requirements-web.txt"
-      - ".github/workflows/deploy-pages.yml"
   push:
     branches:
       - main
@@ -41,7 +33,9 @@ jobs:
           python-version: "3.11"
 
       - name: Install web build dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -r requirements-web.txt
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-web.txt
 
       - name: Build Pygbag web app
         run: python -m pygbag --build --title "Ping Pong - Cinematic Skill Edition" .
@@ -50,7 +44,6 @@ jobs:
         run: |
           test -f build/web/index.html
           touch build/web/.nojekyll
-          echo "Pygbag output is ready for GitHub Pages."
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
@@ -58,7 +51,7 @@ jobs:
           path: build/web
 
   deploy:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
