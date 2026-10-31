@@ -103,6 +103,7 @@ python3 ping_pong_cinematic.py
 | `←` / `→` | Mengubah pilihan |
 | Ketik | Mengisi nama pemain |
 | `ENTER` | Memulai permainan |
+| `ESC` | Keluar dari game saat berada di menu |
 
 ### Mode 1 pemain
 
@@ -134,7 +135,8 @@ Pemain mengendalikan paddle di sisi kanan, sedangkan komputer berada di sisi kir
 | `M` | Mengaktifkan / menonaktifkan suara |
 | `F11` | Mengaktifkan / menonaktifkan fullscreen |
 | `ENTER` | Bermain kembali setelah game over |
-| `ESC` | Kembali ke menu setelah game over |
+| `ESC` | Kembali ke menu setelah game over atau pause (mode 1 pemain) |
+| `Q` | Kembali ke menu dari layar pause |
 
 **Target kemenangan:** pemain pertama yang mencapai 5 poin akan memenangkan pertandingan.
 
