@@ -8,6 +8,7 @@ on:
       - "main.py"
       - "ping_pong_cinematic.py"
       - "requirements-web.txt"
+      - "requirements.txt"
       - ".github/workflows/check-browser-build.yml"
       - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
@@ -34,6 +35,31 @@ jobs:
 
       - name: Build browser game without media gate
         run: python -m pygbag --build --ume_block=0 --title "Ping Pong - Cinematic Skill Edition" .
+
+      - name: Verify browser runtime dependencies in APK
+        run: |
+          python - <<'PY'
+          import re
+          import zipfile
+
+          apk = "build/web/ping-pong-game.apk"
+          with zipfile.ZipFile(apk) as package:
+              requirements = package.read("assets/requirements.txt").decode("utf-8")
+
+          lines = [
+              line.strip().lower()
+              for line in requirements.splitlines()
+              if line.strip() and not line.lstrip().startswith("#")
+          ]
+          has_ce = any(re.match(r"^pygame-ce(?:[<=>!~]|$)", line) for line in lines)
+          has_legacy = any(re.match(r"^pygame(?:[<=>!~]|$)", line) for line in lines)
+          if not has_ce or has_legacy:
+              raise SystemExit(
+                  "APK must request pygame-ce (not legacy pygame). "
+                  f"Found requirements: {lines}"
+              )
+          print("Verified APK runtime requirements:", lines)
+          PY
 
       - name: Disable browser audio bootstrap and obsolete BrowserFS request
         run: |

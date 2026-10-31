@@ -7,10 +7,29 @@ Pygbag membutuhkan main.py dan game loop asynchronous.
 """
 import asyncio
 import traceback
+import platform
 
-import pygame
+# Kirim diagnostik Python ke Console browser. print() Pygbag diarahkan ke
+# terminal/REPL internal, bukan ke DevTools Console.
+def web_log(message):
+    try:
+        platform.console.log("[PingPong Web] " + str(message))
+    except Exception:
+        print("[PingPong Web] " + str(message), flush=True)
 
-import ping_pong_cinematic as game
+
+web_log("main.py mulai dimuat")
+
+try:
+    import pygame
+    web_log("pygame berhasil di-import")
+
+    import ping_pong_cinematic as game
+    web_log("ping_pong_cinematic berhasil di-import")
+except Exception:
+    web_log("GAGAL saat import modul game:")
+    web_log(traceback.format_exc())
+    raise
 
 # Audio sintetis tetap tersedia pada desktop, tetapi tidak digunakan di browser.
 # Inisialisasi mixer SDL di browser dapat macet pada SDL_OpenAudioDevice
@@ -19,18 +38,15 @@ game.WEB_MODE = True
 
 
 async def main():
-    print("[PingPong Web] main.py mulai dijalankan", flush=True)
-
-    # Jangan panggil pygame.init() di browser: fungsi itu menginisialisasi
-    # seluruh subsistem, termasuk mixer/audio. Game web hanya butuh modul ini.
-    pygame.display.init()
-    pygame.font.init()
-    pygame.event.init()
-
-    # Modul keyboard menggunakan subsistem video; tidak memiliki init() sendiri.
-    print("[PingPong Web] display, font, event siap", flush=True)
-
     try:
+        web_log("inisialisasi display/font/event")
+        # Jangan panggil pygame.init() di browser: fungsi itu menginisialisasi
+        # seluruh subsistem, termasuk mixer/audio. Game web hanya butuh modul ini.
+        pygame.display.init()
+        pygame.font.init()
+        pygame.event.init()
+        web_log("display, font, event siap")
+
         app = game.Game()
         app._web_running = True
 
@@ -40,7 +56,7 @@ async def main():
             app._web_running = False
 
         app.quit = stop_web_game
-        print("[PingPong Web] objek Game berhasil dibuat", flush=True)
+        web_log("objek Game berhasil dibuat; mulai game loop")
 
         while app._web_running:
             app.handle_events()
@@ -55,8 +71,8 @@ async def main():
             await asyncio.sleep(0)
 
     except Exception:
-        print("[PingPong Web] ERROR saat game berjalan:", flush=True)
-        traceback.print_exc()
+        web_log("ERROR saat game berjalan:")
+        web_log(traceback.format_exc())
         raise
 
 
