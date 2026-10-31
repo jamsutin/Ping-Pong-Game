@@ -1497,6 +1497,10 @@ class Audio:
     """Pembungkus suara; kalau audio gagal, game tetap jalan tanpa suara."""
 
     def __init__(self):
+        # Audio sintetis tetap aktif pada desktop, tetapi dinonaktifkan di browser.
+        # Ini menghindari inisialisasi mixer dan pembuatan BGM/SFX yang berat di WASM.
+        if globals().get("WEB_MODE", False):
+            return
         self.ok = False
         self.muted = False
         self.sfx = {}
