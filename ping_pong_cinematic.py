@@ -1878,7 +1878,7 @@ class Game:
                 self.audio.toggle_mute()
                 continue
             # 2 pemain: tombol P dipakai Pemain 2, jadi pause hanya lewat ESC
-            pause_keys = (pygame.K_ESCAPE,) if self.mode == 1 else (pygame.K_p, pygame.K_ESCAPE)
+            pause_keys = (pygame.K_p, pygame.K_ESCAPE) if self.mode == 0 else (pygame.K_ESCAPE,)
             if self.state == "play":
                 if key in pause_keys:
                     self.state = "pause"
