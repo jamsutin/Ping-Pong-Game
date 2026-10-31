@@ -11,6 +11,10 @@ import pygame
 
 import ping_pong_cinematic as game
 
+# Browser tidak memerlukan audio sintetis; menyiapkannya saat startup
+# dapat memblokir event loop WebAssembly cukup lama.
+game.WEB_MODE = True
+
 
 async def main():
     pygame.mixer.pre_init(game.SAMPLE_RATE, -16, 1, 512)
