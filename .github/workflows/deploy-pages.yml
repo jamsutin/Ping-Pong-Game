@@ -43,9 +43,6 @@ jobs:
       - name: Build Pygbag web app without media gate
         run: python -m pygbag --build --ume_block=0 --title "Ping Pong - Cinematic Skill Edition" .
 
-      - name: Build Pygbag web app without media gate
-        run: python -m pygbag --build --ume_block=0 --title "Ping Pong - Cinematic Skill Edition" .
-
       - name: Disable browser audio bootstrap and obsolete BrowserFS request
         run: |
           python - <<'PY'
@@ -55,10 +52,8 @@ jobs:
           path = Path("build/web/index.html")
           html = path.read_text(encoding="utf-8")
 
-          # Pygbag 0.9.3 still emits a stale BrowserFS script reference,
-          # although BrowserFS is no longer used by this runtime.
           html, removed = re.subn(
-              r'<script\\s+src="[^"]*browserfs\\.min\\.js"[^>]*>\\s*</script>',
+              r'<script\s+src="[^"]*browserfs\.min\.js"[^>]*>\s*</script>',
               '',
               html,
               flags=re.IGNORECASE,
@@ -66,8 +61,6 @@ jobs:
           if removed != 1:
               raise SystemExit(f"Expected 1 obsolete BrowserFS script, removed {removed}")
 
-          # Disable Pygbag's SDL audio bootstrap on web; the game is silent
-          # in browser mode and opening SDL audio can stall before main.py.
           match = re.search(r'data-os="([^"]+)"', html)
           if not match:
               raise SystemExit("Pygbag data-os setting was not found")
@@ -84,10 +77,6 @@ jobs:
           grep -Eq 'ume_block[[:space:]]*:[[:space:]]*0' build/web/index.html
           ! grep -q 'browserfs.min.js' build/web/index.html
           ! grep -Eq 'data-os="[^"]*snd' build/web/index.html
-          touch build/web/.nojekyll
-        run: |
-          test -f build/web/index.html
-          grep -Eq 'ume_block[[:space:]]*:[[:space:]]*0' build/web/index.html
           touch build/web/.nojekyll
 
       - name: Upload GitHub Pages artifact
