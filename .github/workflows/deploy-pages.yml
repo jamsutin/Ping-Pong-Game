@@ -43,7 +43,48 @@ jobs:
       - name: Build Pygbag web app without media gate
         run: python -m pygbag --build --ume_block=0 --title "Ping Pong - Cinematic Skill Edition" .
 
+      - name: Build Pygbag web app without media gate
+        run: python -m pygbag --build --ume_block=0 --title "Ping Pong - Cinematic Skill Edition" .
+
+      - name: Disable browser audio bootstrap and obsolete BrowserFS request
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("build/web/index.html")
+          html = path.read_text(encoding="utf-8")
+
+          # Pygbag 0.9.3 still emits a stale BrowserFS script reference,
+          # although BrowserFS is no longer used by this runtime.
+          html, removed = re.subn(
+              r'<script\\s+src="[^"]*browserfs\\.min\\.js"[^>]*>\\s*</script>',
+              '',
+              html,
+              flags=re.IGNORECASE,
+          )
+          if removed != 1:
+              raise SystemExit(f"Expected 1 obsolete BrowserFS script, removed {removed}")
+
+          # Disable Pygbag's SDL audio bootstrap on web; the game is silent
+          # in browser mode and opening SDL audio can stall before main.py.
+          match = re.search(r'data-os="([^"]+)"', html)
+          if not match:
+              raise SystemExit("Pygbag data-os setting was not found")
+          tags = [tag for tag in match.group(1).split(",") if tag != "snd"]
+          html = html[:match.start(1)] + ",".join(tags) + html[match.end(1):]
+
+          path.write_text(html, encoding="utf-8")
+          print("Browser audio bootstrap disabled; obsolete BrowserFS tag removed.")
+          PY
+
       - name: Verify browser startup configuration and disable Jekyll
+        run: |
+          test -f build/web/index.html
+          grep -Eq 'ume_block[[:space:]]*:[[:space:]]*0' build/web/index.html
+          ! grep -q 'browserfs.min.js' build/web/index.html
+          ! grep -Eq 'data-os="[^"]*snd' build/web/index.html
+          touch build/web/.nojekyll
         run: |
           test -f build/web/index.html
           grep -Eq 'ume_block[[:space:]]*:[[:space:]]*0' build/web/index.html
