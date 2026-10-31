@@ -1,0 +1,41 @@
+name: Check browser game build
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "main.py"
+      - "ping_pong_cinematic.py"
+      - "requirements-web.txt"
+      - ".github/workflows/check-browser-build.yml"
+      - ".github/workflows/deploy-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install web build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-web.txt
+
+      - name: Build browser game
+        run: python -m pygbag --build --title "Ping Pong - Cinematic Skill Edition" .
+
+      - name: Verify browser build
+        run: |
+          test -f build/web/index.html
+          echo "Browser build completed successfully."
