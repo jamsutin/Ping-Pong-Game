@@ -92,6 +92,46 @@ macOS / Linux:
 python3 ping_pong_cinematic.py
 ```
 
+## 🌐 Versi Browser (Web)
+
+Repository ini juga menyediakan entrypoint terpisah untuk menjalankan game melalui browser menggunakan **Pygbag**. Versi desktop tetap menggunakan `ping_pong_cinematic.py` dan dependensi `requirements.txt`; versi browser menggunakan `main.py` dan `requirements-web.txt`.
+
+Setiap Pull Request yang mengubah file versi web akan menjalankan workflow `Check browser game build` untuk memvalidasi hasil Pygbag. Setelah perubahan versi web digabungkan ke branch `main`, workflow `Build and deploy browser game` akan membangun game dan menerbitkannya ke GitHub Pages.
+
+- **Main browser:** `https://jamsutin.github.io/Ping-Pong-Game/`
+- **Entry point web:** `main.py`
+- **Build dependency:** `requirements-web.txt`
+
+Untuk mengaktifkan penerbitan pertama kali, buka **Settings → Pages** pada repository dan pilih **GitHub Actions** sebagai Build and deployment source. Setelah workflow selesai dengan status sukses, halaman game dapat dibuka melalui link di atas. Build pertama mungkin memerlukan waktu.
+
+Catatan: browser menjalankan port Pygame melalui WebAssembly. Performa, audio, dan kompatibilitas dapat berbeda antar-browser/perangkat. Uji hasil deployment sebelum membagikan link sebagai versi final.
+
+### Menjalankan build web secara lokal
+
+Gunakan Python 3.11 dan lingkungan virtual terpisah dari instalasi desktop:
+
+```bash
+python -m venv .venv-web
+```
+
+Windows:
+
+```powershell
+.venv-web\\Scripts\\activate
+python -m pip install -r requirements-web.txt
+python -m pygbag .
+```
+
+macOS / Linux:
+
+```bash
+source .venv-web/bin/activate
+python -m pip install -r requirements-web.txt
+python -m pygbag .
+```
+
+Buka `http://localhost:8000` setelah server Pygbag siap. Versi desktop tetap dijalankan dengan instruksi instalasi di atas.
+
 ## 🎮 Kontrol Permainan
 
 ### Menu
