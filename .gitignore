@@ -24,6 +24,11 @@ ping_pong_settings.json
 Thumbs.db
 Desktop.ini
 
+# Build versi web Pygbag dan artefak distribusi
+build/
+dist/
+.venv-web/
+
 # Log dan file sementara
 *.log
 *.tmp
