@@ -1496,11 +1496,7 @@ def build_bgm():
 class Audio:
     """Pembungkus suara; kalau audio gagal, game tetap jalan tanpa suara."""
 
-    def __init__(self):
-        # Audio sintetis tetap aktif pada desktop, tetapi dinonaktifkan di browser.
-        # Ini menghindari inisialisasi mixer dan pembuatan BGM/SFX yang berat di WASM.
-        if globals().get("WEB_MODE", False):
-            return
+        def __init__(self):
         self.ok = False
         self.muted = False
         self.sfx = {}
@@ -1508,6 +1504,10 @@ class Audio:
         self.bgm_slow = None
         self.bgm_ch = None
         self.level = 0.35
+        # Audio sintetis tetap aktif pada desktop, tetapi dinonaktifkan di browser.
+        # Ini menghindari inisialisasi mixer dan pembuatan BGM/SFX yang berat di WASM.
+        if globals().get("WEB_MODE", False):
+            return
         try:
             if pygame.mixer.get_init() is None:
                 pygame.mixer.init(SAMPLE_RATE, -16, 1, 512)
