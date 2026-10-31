@@ -26,8 +26,8 @@ async def main():
     pygame.display.init()
     pygame.font.init()
     pygame.event.init()
-    pygame.key.init()
 
+    # Modul keyboard menggunakan subsistem video; tidak memiliki init() sendiri.
     print("[PingPong Web] display, font, event siap", flush=True)
 
     try:
