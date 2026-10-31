@@ -98,13 +98,15 @@ python3 ping_pong_cinematic.py
 
 | Tombol | Fungsi |
 |---|---|
-| `TAB` | Berpindah halaman menu |
+| `TAB` | Berganti halaman menu (pertandingan, karakter pemain, dan halaman karakter kedua/CPU sesuai mode) |
 | `↑` / `↓` | Memilih baris menu |
 | `←` / `→` | Mengubah pilihan |
 | Ketik | Mengisi nama pemain |
 | `ENTER` | Memulai permainan |
 
 ### Mode 1 pemain
+
+Pemain mengendalikan paddle di sisi kanan, sedangkan komputer berada di sisi kiri.
 
 | Tombol | Fungsi |
 |---|---|
@@ -120,7 +122,7 @@ python3 ping_pong_cinematic.py
 | Pemain 1 (kiri) | `W` | Bergerak ke atas |
 | Pemain 1 (kiri) | `S` | Bergerak ke bawah |
 | Pemain 1 (kiri) | `D` | Menggunakan skill |
-| Pemain 2 (kanan) | `P` | Bergerak ke atas |
+| Pemain 2 (kanan) | `P` | Bergerak ke atas (bukan tombol pause) |
 | Pemain 2 (kanan) | `L` | Bergerak ke bawah |
 | Pemain 2 (kanan) | `K` | Menggunakan skill |
 | Semua pemain | `ESC` | Pause |
