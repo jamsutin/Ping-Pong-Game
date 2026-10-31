@@ -1,0 +1,29 @@
+# Python bytecode dan cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables / secrets
+.env
+.env.*
+
+# File pengaturan lokal yang dibuat otomatis oleh game
+ping_pong_settings.json
+
+# Editor dan IDE
+.vscode/
+.idea/
+
+# Sistem operasi
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Log dan file sementara
+*.log
+*.tmp
