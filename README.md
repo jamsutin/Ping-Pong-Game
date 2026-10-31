@@ -135,7 +135,7 @@ Pemain mengendalikan paddle di sisi kanan, sedangkan komputer berada di sisi kir
 | `M` | Mengaktifkan / menonaktifkan suara |
 | `F11` | Mengaktifkan / menonaktifkan fullscreen |
 | `ENTER` | Bermain kembali setelah game over |
-| `ESC` | Kembali ke menu setelah game over atau pause (mode 1 pemain) |
+| `ESC` | Kembali ke menu setelah game over; saat pertandingan digunakan untuk pause sesuai mode |
 | `Q` | Kembali ke menu dari layar pause |
 
 **Target kemenangan:** pemain pertama yang mencapai 5 poin akan memenangkan pertandingan.
