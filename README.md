@@ -96,7 +96,7 @@ python3 ping_pong_cinematic.py
 
 Repository ini juga menyediakan entrypoint terpisah untuk menjalankan game melalui browser menggunakan **Pygbag**. Versi desktop tetap menggunakan `ping_pong_cinematic.py` dan dependensi `requirements.txt`; versi browser menggunakan `main.py` dan `requirements-web.txt`.
 
-Setiap Pull Request yang mengubah file versi web akan menjalankan workflow `Check browser game build` untuk memvalidasi hasil Pygbag. Setelah perubahan versi web digabungkan ke branch `main`, workflow `Build and deploy browser game` akan membangun game dan menerbitkannya ke GitHub Pages.
+Setiap Pull Request menjalankan workflow `Check browser game build`: tes statis, tes desktop, build Pygbag, lalu **tes browser Chromium sungguhan** (game harus mencapai frame pertama, menerima keyboard, dan bisa di-pause). Setelah digabungkan ke `main`, workflow `Build and deploy browser game` mengulang tes itu sebelum deploy, lalu menguji situs GitHub Pages yang sudah live. Status build sukses saja tidak cukup; game harus benar-benar berjalan.
 
 - **Main browser:** `https://jamsutin.github.io/Ping-Pong-Game/`
 - **Entry point web:** `main.py`
@@ -108,7 +108,7 @@ Catatan: browser menjalankan port Pygame melalui WebAssembly. Performa, audio, d
 
 ### Menjalankan build web secara lokal
 
-Gunakan Python 3.11 dan lingkungan virtual terpisah dari instalasi desktop:
+Gunakan Python 3.12 dan lingkungan virtual terpisah dari instalasi desktop:
 
 ```bash
 python -m venv .venv-web
@@ -131,6 +131,18 @@ python -m pygbag .
 ```
 
 Buka `http://localhost:8000` setelah server Pygbag siap. Versi desktop tetap dijalankan dengan instruksi instalasi di atas.
+
+### Menjalankan tes
+
+```bash
+python -m pip install pytest playwright
+python -m playwright install chromium
+python -m pytest tests/test_web_compat.py   # tes statis kompatibilitas browser
+python -m pygbag --build .                   # build ke build/web
+python tests/browser_smoke_test.py build/web # tes browser nyata
+```
+
+Catatan penting untuk versi browser: modul `wave` tidak tersedia di Python WebAssembly Pygbag, `pygame.SCALED` dimatikan di browser, dan audio sintetis hanya aktif di desktop.
 
 ## 🎮 Kontrol Permainan
 
