@@ -1496,7 +1496,7 @@ def build_bgm():
 class Audio:
     """Pembungkus suara; kalau audio gagal, game tetap jalan tanpa suara."""
 
-        def __init__(self):
+    def __init__(self):
         self.ok = False
         self.muted = False
         self.sfx = {}
