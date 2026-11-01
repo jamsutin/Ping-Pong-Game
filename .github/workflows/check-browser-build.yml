@@ -33,6 +33,9 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements-web.txt
 
+      - name: Validate Python syntax before packaging
+        run: python -m py_compile main.py ping_pong_cinematic.py
+
       - name: Build browser game without media gate
         run: python -m pygbag --build --ume_block=0 --title "Ping Pong - Cinematic Skill Edition" .
 
