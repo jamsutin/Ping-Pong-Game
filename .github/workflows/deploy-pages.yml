@@ -4,12 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "main.py"
-      - "ping_pong_cinematic.py"
-      - "requirements-web.txt"
-      - "requirements.txt"
-      - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -25,91 +19,45 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Install web build dependencies
+          python-version: "3.12"
+      - uses: actions/configure-pages@v5
+      - name: Install build + test dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements-web.txt
-
-      - name: Validate Python syntax before packaging
+          python -m pip install -r requirements-web.txt pytest playwright
+          python -m playwright install --with-deps chromium
+      - name: Validate Python syntax
         run: python -m py_compile main.py ping_pong_cinematic.py
-
+      - name: Web-compatibility regression tests (static)
+        run: python -m pytest tests/test_web_compat.py -v
       - name: Build Pygbag web app without media gate
         run: python -m pygbag --build --ume_block=0 --title "Ping Pong - Cinematic Skill Edition" .
-
-      - name: Verify browser runtime dependencies in APK
+      - name: Verify APK contents and startup configuration
         run: |
           python - <<'PY'
-          import re
-          import zipfile
-
-          apk = "build/web/ping-pong-game.apk"
-          with zipfile.ZipFile(apk) as package:
-              requirements = package.read("assets/requirements.txt").decode("utf-8")
-
-          lines = [
-              line.strip().lower()
-              for line in requirements.splitlines()
-              if line.strip() and not line.lstrip().startswith("#")
-          ]
-          has_ce = any(re.match(r"^pygame-ce(?:[<=>!~]|$)", line) for line in lines)
-          has_legacy = any(re.match(r"^pygame(?:[<=>!~]|$)", line) for line in lines)
-          if not has_ce or has_legacy:
-              raise SystemExit(
-                  "APK must request pygame-ce (not legacy pygame). "
-                  f"Found requirements: {lines}"
-              )
-          print("Verified APK runtime requirements:", lines)
+          import glob, re, zipfile
+          apks = glob.glob("build/web/*.apk")
+          assert len(apks) == 1, f"expected exactly one APK, got {apks}"
+          with zipfile.ZipFile(apks[0]) as z:
+              names = set(z.namelist())
+              for need in ("assets/main.py", "assets/ping_pong_cinematic.py"):
+                  assert need in names, f"{need} missing from APK: {sorted(names)}"
+              reqs = z.read("assets/requirements.txt").decode().lower()
+          lines = [l.strip() for l in reqs.splitlines() if l.strip() and not l.lstrip().startswith("#")]
+          assert any(re.match(r"^pygame-ce(?:[<=>!~]|$)", l) for l in lines), lines
+          assert not any(re.match(r"^pygame(?:[<=>!~]|$)", l) for l in lines), lines
+          html = open("build/web/index.html", encoding="utf-8").read()
+          assert re.search(r"ume_block\s*:\s*0", html), "ume_block must be 0"
+          print("APK and index.html OK:", apks[0], lines)
           PY
-
-      - name: Disable browser audio bootstrap and obsolete BrowserFS request
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-
-          path = Path("build/web/index.html")
-          html = path.read_text(encoding="utf-8")
-
-          html, removed = re.subn(
-              r'<script\s+src="[^"]*browserfs\.min\.js"[^>]*>\s*</script>',
-              '',
-              html,
-              flags=re.IGNORECASE,
-          )
-          if removed != 1:
-              raise SystemExit(f"Expected 1 obsolete BrowserFS script, removed {removed}")
-
-          match = re.search(r'data-os="([^"]+)"', html)
-          if not match:
-              raise SystemExit("Pygbag data-os setting was not found")
-          tags = [tag for tag in match.group(1).split(",") if tag != "snd"]
-          html = html[:match.start(1)] + ",".join(tags) + html[match.end(1):]
-
-          path.write_text(html, encoding="utf-8")
-          print("Browser audio bootstrap disabled; obsolete BrowserFS tag removed.")
-          PY
-
-      - name: Verify browser startup configuration and disable Jekyll
-        run: |
-          test -f build/web/index.html
-          grep -Eq 'ume_block[[:space:]]*:[[:space:]]*0' build/web/index.html
-          ! grep -q 'browserfs.min.js' build/web/index.html
-          ! grep -Eq 'data-os="[^"]*snd' build/web/index.html
-          touch build/web/.nojekyll
-
-      - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v4
+      - name: Real browser test (Chromium) BEFORE deploying
+        run: python tests/browser_smoke_test.py build/web
+      - name: Disable Jekyll
+        run: touch build/web/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: build/web
 
@@ -124,3 +72,18 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  verify-live:
+    name: Verify the deployed site in a real browser
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          python -m pip install --upgrade pip playwright
+          python -m playwright install --with-deps chromium
+      - name: Smoke-test the live GitHub Pages URL
+        run: python tests/browser_smoke_test.py "https://jamsutin.github.io/Ping-Pong-Game/"

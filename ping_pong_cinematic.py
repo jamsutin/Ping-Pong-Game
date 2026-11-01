@@ -56,11 +56,18 @@ import math
 import os
 import random
 import sys
-import wave
 from array import array
 from collections import deque
 
 import pygame
+
+# Modul `wave` tidak ada di CPython WebAssembly milik Pygbag. Hanya dipakai
+# untuk membangun suara sintetis di desktop (di browser audio dinonaktifkan),
+# jadi import-nya dibuat opsional agar game tetap bisa di-import di browser.
+try:
+    import wave
+except ImportError:  # pragma: no cover - hanya terjadi di runtime browser
+    wave = None
 
 # ============================================================
 #  KONFIGURASI
@@ -1676,7 +1683,13 @@ def spiral_pos(p0, center, k):
 # ============================================================
 class Game:
     def __init__(self):
-        flags = getattr(pygame, "SCALED", 0)
+        # SCALED butuh renderer SDL (WebGL) dan dapat gagal di browser dengan
+        # "failed to create renderer". Di browser, Pygbag sudah menskalakan
+        # canvas lewat CSS, jadi cukup mode software biasa.
+        if globals().get("WEB_MODE", False):
+            flags = 0
+        else:
+            flags = getattr(pygame, "SCALED", 0)
         self.screen = pygame.display.set_mode((SCREEN_W, SCREEN_H), flags)
         pygame.display.set_caption("Ping Pong Game By Fredd")
         self.clock = pygame.time.Clock()
